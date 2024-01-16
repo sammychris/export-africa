@@ -18,7 +18,12 @@ const LeftBar = ({ showTaskForm, showCategoryForm, onLogOut, categories, tasks})
             bgColor=""
         />
 
-        <span className="ml-[20px] absolute bottom-[50px] text-[#3498db]"><Link href={""} onClick={onLogOut}>Logout</Link></span>
+        <span className="ml-[20px] absolute bottom-[50px] text-[#3498db]">
+            <Link href={""} onClick={(e) => {
+                e.preventDefault();
+                onLogOut();
+            }}>Logout</Link>
+        </span>
     </div>
 }
 
