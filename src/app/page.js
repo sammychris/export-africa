@@ -133,7 +133,7 @@ export default function Home() {
     return categories.map(category => ({
       ...category,
       tasks: tasks.filter(task => task.meta.categoryId === category.id),
-    }));
+    })).sort((a, b) => b.id - a.id);
   }
 
   const organizeData = organizeTasksByCategory(categories, tasks);
