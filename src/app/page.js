@@ -1,113 +1,205 @@
-import Image from 'next/image'
+'use client'
+import LeftBar from '@/components/LeftBar';
+import LoginFormContainer from '@/containers/LoginFormContainer';
+import { getAccessToken, removeAccessToken, removeRefreshToken } from '@/utils/cookieUtils';
+import {useState, useEffect, useRef } from 'react';
+import CategoryFormContainer from '@/containers/CategoryFormContainer';
+import TaskFormContainer from '@/containers/TaskFormContainer';
+import CategoryList from '@/components/CategoryList';
+import { getCategories, deleteCategory, getCategoryById } from '@/apiServices/categoryApi';
+import { deleteTask, getTasks } from '@/apiServices/taskApi';
+import InfoPage from '@/components/InfoPage';
+
+
 
 export default function Home() {
+  const [accessToken, setAccessToken] = useState(getAccessToken());
+  const [isCatForm, setIsCatForm] = useState(false);
+  const [isTaskForm, setIsTaskForm] = useState(false);
+  const [isInfoPage, setIsInfoPage] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editCategoryData, setEditCategoryData] = useState(null);
+  const [editTaskData, setEditTaskData] = useState(null);
+  const [isCategoryId, setIsCategoryId] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [categoryItem, setCategoryItem] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [status, setStatus] = useState('Loading Tasks...');
+  const optionsRef = useRef(null);
+
+  useEffect(() => {
+    window.addEventListener('click', openCategoryOption);
+    return () => {
+    window.removeEventListener('click', openCategoryOption);
+    };
+}, []); // Include dependencies
+
+  useEffect(() => {
+      fetchData();
+      setIsLoading(false);
+  }, []);
+
+
+  const fetchData = async () => {
+    try {
+        const categoryData = await getCategories();
+        const taskData = await getTasks();
+        setCategories(categoryData.results);
+        setTasks(taskData.results);
+    } catch (error) {
+        
+        console.error('Error fetching data:', error);
+    } finally{
+      setStatus('');
+    }
+  };
+
+  const showTaskForm = () => {
+    if(!categories.length) return alert("Oop! You need to create at least one category before creating a task")
+    setIsTaskForm(!isTaskForm);
+    setEditTaskData(null);
+  }
+
+  const showCategoryForm = () => {
+    setIsCatForm(!isCatForm);
+    setEditCategoryData(null);
+  }
+
+  const showInfoPage = () => {
+    setIsInfoPage(!isInfoPage);
+  }
+
+  const openCategoryOption = (categoryId) => {
+    setIsCategoryId(categoryId === isCategoryId ? null : categoryId);
+  }
+
+  const handleEditCategory = (category) => {    
+    showCategoryForm();
+    const catFormData = {
+      id: category?.id,
+      title: category?.label,
+      color: category?.meta?.color,
+      icon: category?.meta?.icon,
+      description: category?.description
+    }
+    setEditCategoryData(catFormData);
+    openCategoryOption();
+  }
+
+  const handleEditTask = (task) => { 
+    showTaskForm();   
+    const taskFormData = {
+      id: task?.id,
+      title: task?.label,
+      categoryId: task?.meta?.categoryId,
+      priority: task?.meta?.priority,
+      description: task?.description
+    }
+    setEditTaskData(taskFormData);
+  }
+
+  const handleDeleteCategory = async (categoryId) => {
+    const category = organizeData.find(cat => cat.id === categoryId);
+    const catTasks = category.tasks;
+      if(!confirm("Are you sure, you want to use this option?")) return;
+      setStatus('Deleting Category...')
+      await deleteCategory(categoryId);
+      for(let i = 0; i < catTasks.length; i++){
+        await deleteTask(catTasks[i].id);
+      }
+      fetchData();
+  }
+
+  const handleDeleteTask = async (taskId) => {
+    if(!confirm("Are you sure, you want to use this option?")) return;
+    setStatus('Deleting Task...')
+    await deleteTask(taskId);
+    fetchData();
+  }
+
+  const handleGetCategory = async (categoryId) => {
+    showInfoPage();
+    const data = await getCategoryById(categoryId);
+    setCategoryItem(data);
+  }
+
+  const onLogOut = () => {
+    removeAccessToken();
+    removeRefreshToken();
+    setAccessToken(null);
+  };
+
+  const organizeTasksByCategory = (categories, tasks) => {
+    return categories.map(category => ({
+      ...category,
+      tasks: tasks.filter(task => task.meta.categoryId === category.id),
+    }));
+  }
+
+  const organizeData = organizeTasksByCategory(categories, tasks);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div>
+      {isLoading ? (
+        <div className="loader-container">
+          <div className="loader"></div>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      ) : (
+        accessToken ? (
+          <main className="grid grid-cols-12 gap-5 max-w-[1400px] mx-auto my-[50px]">
+            {isTaskForm && (
+              <TaskFormContainer
+                showTaskForm={showTaskForm}
+                categories={categories}
+                editTaskData={editTaskData}
+                fetchData={fetchData}
+              />
+            )}
+            {isCatForm && (
+              <CategoryFormContainer
+                showCategoryForm={showCategoryForm}
+                accessToken={accessToken}
+                editCategoryData={editCategoryData}
+                fetchData={fetchData}
+              />
+            )}
+             {isInfoPage && (
+              <InfoPage
+                showInfoPage={showInfoPage}
+                {...categoryItem}
+              />
+            )}
+            <LeftBar 
+              showTaskForm={showTaskForm} 
+              showCategoryForm={showCategoryForm}
+              onLogOut={onLogOut}
+              categories={categories}
+              tasks={tasks}
+            />
+            <div className="col-span-10 h-[700px] text-sm relative w-[100%] bg-white p-3 shadow-[0px_13px_26px_0px_rgba(0,0,0,0.10)] rounded-md overflow-auto">
+              <h1 className="text-[#000] font-bold text-base py-2">Tasks</h1>
+              <main className="flex">
+                <CategoryList
+                    categories={categories}
+                    organizeData={organizeData}
+                    isCategoryId={isCategoryId}
+                    openCategoryOption={openCategoryOption}
+                    showCategoryForm={showCategoryForm}
+                    handleEditTask={handleEditTask}
+                    handleDeleteCategory={handleDeleteCategory}
+                    handleEditCategory={handleEditCategory}
+                    handleDeleteTask={handleDeleteTask}
+                    status={status}
+                    optionsRef={optionsRef}
+                    handleGetCategory={handleGetCategory}
+                />
+              </main>
+            </div>
+          </main>
+        ) : (
+          <LoginFormContainer />
+        )
+      )}
+    </div> 
   )
 }
