@@ -1,47 +1,72 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* styles.css */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+/* Add your custom styles here */
+.bg-neutral {
+  background-color: #f5f5f5; /* Neutral Background Color */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.bg-deep-blue {
+  background-color: #001f3f; /* Deep Blue Background Color */
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: #dfe2e3;
-  margin: 0;
-  padding: 0;
+.text-deep-blue {
+  color: #001f3f; /* Deep Blue Text Color */
 }
 
-.loader-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+.text-terracotta {
+  color: #e6733e; /* Terracotta Text Color */
 }
 
-.loader {
-  border: 8px solid #f3f3f3;
-  border-top: 8px solid #3498db;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
+/* Add more custom styling as needed */
+
+/* Optional Adjustments */
+.container { 
+  max-width: 1128px; /* Consider a max width for larger screens */
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+h1 { 
+  color: #003366; /* A slightly darker blue hue for the main heading */
 }
 
+
+.card {
+  background-color: #fff;
+  border-radius: 8px; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); 
+}
+
+
+/* Colors */
+.text-deep-blue {
+  color: #283E59;  /* A darker blue that still aligns with LinkedIn */
+}
+
+.text-linkedin-blue {
+  color: #0A66C2;  /* LinkedIn's signature blue */
+}
+
+
+
+/* Inside a CSS file you'd import into DealerRates */
+.dealer-rates table {
+  border-collapse: collapse; /* Make table borders nicely defined */
+}
+
+.dealer-rates th, .dealer-rates td {
+  padding: 8px 12px; 
+  border: 1px solid #ddd; /* Subtle table borders */
+}
+
+.dealer-info { /* Optional: Class for scoping if needed */
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+  /* ... other styles */
+}
+
+
+
+.nav-link {
+  @apply flex items-center gap-2 px-4 py-3 rounded-md hover:bg-gray-100 text-gray-700 active:bg-blue-500 active:text-white; 
+}
