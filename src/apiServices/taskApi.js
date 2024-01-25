@@ -11,7 +11,6 @@ export const createTask = async (data) => {
             description,
             meta: { categoryId, priority },
         });
-        console.log({ response: responseData }); // Log the response data
         return responseData;
     } catch (error) {
         console.error('Error creating Task:', error);
@@ -53,7 +52,6 @@ export const updateTask = async (id, updatedData) => {
 export const deleteTask = async (id) => {
     try {
         const responseData = await makeRequest('delete', `${apiUrl}${id}/`);
-        console.log('Delete Task Response:', responseData);
         return responseData;
     } catch (error) {
         console.error('Error deleting Task:', error);
