@@ -2,13 +2,13 @@ import React from 'react';
 import Link from 'next/link';
 import { LiaTimesSolid } from "react-icons/lia";
 
-const CloseButton = ({ onClick }) => {
+const CloseButton = ({ onClick = () => '' }) => {
   return (
-    <Link href={""} className="absolute top-5 right-6 text-2xl hover:text-gray-500" title="close" onClick={(e) => {
+    <Link href={""} className="absolute top-0 right-0 text-2xl hover:text-gray-500" title="close" onClick={(e) => {
       e.preventDefault();
       onClick();
     }}>
-      <LiaTimesSolid />
+      <LiaTimesSolid size={30}/>
     </Link>
   );
 };
