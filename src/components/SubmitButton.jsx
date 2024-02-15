@@ -7,11 +7,11 @@ const SubmitButton = ({ isSubmitting, edited }) => {
       : 'Update'
     : isSubmitting
     ? 'Submitting...'
-    : 'Submit';
+    : 'Save';
 
   return (
     <button
-      className="bg-[#5CBC9A] rounded-[3px] w-[125px] h-10 text-white text-center text-base font-normal hover:bg-[#4a967b]"
+      className="bg-deep-blue rounded-[3px] w-[100px] h-8 text-white text-center text-base font-normal hover:bg-[#001f3fca]"
       type="submit"
       disabled={isSubmitting}
     >
