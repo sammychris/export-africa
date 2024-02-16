@@ -12,12 +12,12 @@ const TextAreaInput = ({
   touched,
 }) => {
   return (
-    <div className="mb-[60px]">
+    <div className="mb-[50px]">
       <div>
-        <label className="text-[#757575] text-base font-normal">{label}</label>
+        <label className="text-[#757575] text-sm">{label}</label> <span className="text-[red] text-[20px]">*</span>
       </div>
       <textarea
-        className="w-full max-w-[861px] h-[104px] bg-[#F2F2F2] rounded-[3px] mt-[10px] px-4"
+        className="w-full max-w-[861px] h-[104px] bg-[#F2F2F2] rounded-[3px] mt-[5px] px-4 py-2"
         type="text"
         id={id}
         name={name}
